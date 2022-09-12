@@ -1,0 +1,13 @@
+[package]
+name = "print_files"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+walkdir = "2.3.2"
+md5 = "0.7.0"
+time = {version = "0.3.11", features = ["std", "formatting", "local-offset"]}
+clap = { version = "3.2.12", features = ["derive"] }
+comfy-table = "6.1.0"
