@@ -1,8 +1,10 @@
 use clap::Parser;
 use comfy_table::presets::ASCII_NO_BORDERS;
 use comfy_table::Table;
-use std::error::Error;
+use md5::Context;
+use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
+use std::{error::Error, fs::File};
 use time::{format_description, OffsetDateTime, UtcOffset};
 use walkdir::WalkDir;
 
@@ -58,13 +60,24 @@ fn main() -> Result<(), Box<dyn Error>> {
         let f_date_modified = date.format(&format).unwrap();
 
         let f_hash = if args.md5 {
-            let f_bytes = match std::fs::read(entry.path()) {
-                Ok(bytes) => bytes,
-                Err(_) => {
-                    continue;
+            let file = File::open(entry.path())?;
+            let mut reader = BufReader::with_capacity(64000, file);
+            let mut md5 = Context::new();
+
+            loop {
+                let len = {
+                    let buf = reader.fill_buf()?;
+                    md5.consume(buf);
+                    buf.len()
+                };
+
+                if len == 0 {
+                    break;
                 }
-            };
-            format!("{:x}", md5::compute(f_bytes))
+                reader.consume(len);
+            }
+
+            format!("{:x}", md5.compute())
         } else {
             "".to_string()
         };
