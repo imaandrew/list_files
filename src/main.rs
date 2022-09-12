@@ -35,6 +35,17 @@ fn main() -> Result<(), Box<dyn Error>> {
         "MD5 Hash",
     ]);
 
+    if let Some(file) = &args.output {
+        std::fs::create_dir_all(match file.parent() {
+            Some(x) => x,
+            None => {
+                eprintln!("Cannot create output file: `{}`", file.to_string_lossy());
+                std::process::exit(1);
+            }
+        })?;
+        std::fs::write(file, "test")?;
+    }
+
     for entry in WalkDir::new(args.path)
         .follow_links(true)
         .into_iter()
